@@ -21,40 +21,20 @@ class MiPedidoApp extends StatelessWidget {
     );
   }
 }
+class Producto {
+  final String nombre;
+  final double precio;
+  const Producto(this.nombre, this.precio);
+}
 
 class PantallaPedido extends StatelessWidget {
   const PantallaPedido({super.key});
 
-  Widget _fila(String nombre, String precio) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(nombre,
-                    style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 4),
-                Text(precio,
-                    style: const TextStyle(fontSize: 15, color: Colors.white70)),
-              ],
-            ),
-          ),
-          IconButton.outlined(onPressed: () {}, icon: const Icon(Icons.remove)),
-          const SizedBox(
-            width: 40,
-            child: Text('0',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          ),
-          IconButton.outlined(onPressed: () {}, icon: const Icon(Icons.add)),
-        ],
-      ),
-    );
-  }
+  static const List<Producto> _productos = [
+    Producto('Café', 10.00),
+    Producto('Sándwich', 25.00),
+    Producto('Jugo', 12.00),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -63,15 +43,19 @@ class PantallaPedido extends StatelessWidget {
       body: Column(
         children: [
           Expanded(
-            child: ListView(
+            child: ListView.separated(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              children: [
-                _fila('Café', 'Q10.00'),
-                const Divider(height: 1),
-                _fila('Sándwich', 'Q25.00'),
-                const Divider(height: 1),
-                _fila('Jugo', 'Q12.00'),
-              ],
+              itemCount: _productos.length,
+              separatorBuilder: (_, __) => const Divider(height: 1),
+              itemBuilder: (context, i) {
+                return ProductoPedido(
+                  nombre: _productos[i].nombre,
+                  precio: _productos[i].precio,
+                  cantidad: 0,
+                  onAgregar: () {},
+                  onQuitar: () {},
+                );
+              },
             ),
           ),
           const Divider(height: 1),
@@ -101,6 +85,71 @@ class PantallaPedido extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Fila reutilizable: recibe los datos y las acciones como parámetros.
+class ProductoPedido extends StatelessWidget {
+  final String nombre;
+  final double precio;
+  final int cantidad;
+  final VoidCallback onAgregar;
+  final VoidCallback onQuitar;
+
+  const ProductoPedido({
+    super.key,
+    required this.nombre,
+    required this.precio,
+    required this.cantidad,
+    required this.onAgregar,
+    required this.onQuitar,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  nombre,
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Q${precio.toStringAsFixed(2)}',
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton.outlined(
+            onPressed: onQuitar,
+            icon: const Icon(Icons.remove),
+          ),
+          SizedBox(
+            width: 40,
+            child: Text(
+              '$cantidad',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          IconButton.outlined(
+            onPressed: onAgregar,
+            icon: const Icon(Icons.add),
           ),
         ],
       ),
